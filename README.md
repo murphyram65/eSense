@@ -1,2 +1,2 @@
-# iLogotron
-le Logotron nouvelle version
+# eSense
+Cohérance cardiaque et relaxation
