@@ -1,833 +1,1402 @@
 <!DOCTYPE html>
+
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Logotron - Générateur de mots savants</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Exo+2:ital,wght@0,300;0,600;1,300&display=swap" rel="stylesheet">
+<meta charset="UTF-8"/>
+<!-- iOS FIX: viewport-fit=cover pour safe areas (notch/Dynamic Island) -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<!-- iOS FIX: force la couleur de la barre Safari en noir -->
+<meta name="theme-color" content="#0a0a0f"/>
+<title>RespiRelax</title>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-:root {
-  --neon-green: #39ff14;
-  --neon-pink: #ff2d78;
-  --neon-cyan: #00f5ff;
-  --neon-orange: #ff6b00;
-  --deep-space: #0a0c12;
-  --space-blue: #0e121f;
-  --panel-bg: rgba(0, 245, 255, 0.05);
-  --panel-border: rgba(0, 245, 255, 0.25);
-  --glow-green: 0 0 8px #39ff14, 0 0 20px rgba(57,255,20,0.3);
-  --glow-pink: 0 0 8px #ff2d78, 0 0 20px rgba(255,45,120,0.4);
-  --glow-cyan: 0 0 8px #00f5ff, 0 0 20px rgba(0,245,255,0.3);
-}
-
-html, body {
-  height: 100%;
-  overflow-x: hidden;
-}
-
-body {
-  font-family: 'Exo 2', sans-serif;
-  background: linear-gradient(135deg, #05070c 0%, #0a0f1a 50%, #03050a 100%);
-  min-height: 100vh;
-  color: #d0eaff;
-  position: relative;
-  padding-bottom: 40px;
-}
-
-/* Fond étoilé amélioré */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image: 
-    radial-gradient(2px 2px at 15% 25%, rgba(255,255,255,0.9) 0%, transparent 100%),
-    radial-gradient(2px 2px at 35% 12%, rgba(0,245,255,0.8) 0%, transparent 100%),
-    radial-gradient(3px 3px at 52% 35%, rgba(255,255,255,0.85) 0%, transparent 100%),
-    radial-gradient(2px 2px at 78% 8%, rgba(255,45,120,0.7) 0%, transparent 100%),
-    radial-gradient(2px 2px at 88% 28%, rgba(57,255,20,0.7) 0%, transparent 100%),
-    radial-gradient(3px 3px at 42% 55%, rgba(255,255,255,0.8) 0%, transparent 100%),
-    radial-gradient(2px 2px at 65% 72%, rgba(0,245,255,0.6) 0%, transparent 100%),
-    radial-gradient(2px 2px at 25% 85%, rgba(255,45,120,0.6) 0%, transparent 100%),
-    radial-gradient(2px 2px at 92% 45%, rgba(57,255,20,0.6) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 5% 60%, rgba(255,255,255,0.7) 0%, transparent 100%),
-    radial-gradient(2px 2px at 48% 78%, rgba(0,245,255,0.5) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 72% 55%, rgba(255,107,0,0.6) 0%, transparent 100%),
-    radial-gradient(2px 2px at 8% 35%, rgba(255,255,255,0.6) 0%, transparent 100%),
-    radial-gradient(2px 2px at 95% 82%, rgba(255,45,120,0.5) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 58% 92%, rgba(57,255,20,0.5) 0%, transparent 100%);
-  background-size: 300px 300px;
-  background-repeat: repeat;
-  pointer-events: none;
-  z-index: 0;
-  animation: starsFloat 120s linear infinite;
-}
-
-@keyframes starsFloat {
-  0% { background-position: 0 0; }
-  100% { background-position: 300px 300px; }
-}
-
-/* Lignes de balayage */
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(0, 0, 0, 0.2) 2px,
-    rgba(0, 0, 0, 0.2) 4px
-  );
-  pointer-events: none;
-  z-index: 1;
-}
-
-.container {
-  position: relative;
-  z-index: 2;
-  max-width: 430px;
-  margin: 0 auto;
-  padding: 0 16px;
-}
-
-/* ===== HEADER ===== */
-header {
-  text-align: center;
-  padding: 32px 0 20px;
-  position: relative;
-}
-
-.header-beam {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60%;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
-  box-shadow: var(--glow-cyan);
-}
-
-.title-wrap {
-  display: inline-block;
-  position: relative;
-}
-
-header h1 {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 3rem;
-  font-weight: 900;
-  color: var(--neon-cyan);
-  letter-spacing: 6px;
-  text-transform: uppercase;
-  text-shadow: var(--glow-cyan), 0 0 40px rgba(0,245,255,0.2);
-  animation: titlePulse 3s ease-in-out infinite;
-}
-
-@keyframes titlePulse {
-  0%, 100% { text-shadow: 0 0 8px #00f5ff, 0 0 20px rgba(0,245,255,0.3); }
-  50% { text-shadow: 0 0 14px #00f5ff, 0 0 40px rgba(0,245,255,0.6), 0 0 70px rgba(0,245,255,0.2); }
-}
-
-.title-sub {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 0.65rem;
-  color: var(--neon-pink);
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  margin-top: 4px;
-  text-shadow: var(--glow-pink);
-  opacity: 0.85;
-}
-
-.corner-deco {
-  position: absolute;
-  width: 14px;
-  height: 14px;
-}
-.corner-deco.tl { top: 0; left: 0; border-top: 2px solid var(--neon-cyan); border-left: 2px solid var(--neon-cyan); }
-.corner-deco.tr { top: 0; right: 0; border-top: 2px solid var(--neon-cyan); border-right: 2px solid var(--neon-cyan); }
-.corner-deco.bl { bottom: 0; left: 0; border-bottom: 2px solid var(--neon-cyan); border-left: 2px solid var(--neon-cyan); }
-.corner-deco.br { bottom: 0; right: 0; border-bottom: 2px solid var(--neon-cyan); border-right: 2px solid var(--neon-cyan); }
-
-/* ===== DIVIDER ===== */
-.divider {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 6px 0 20px;
-}
-.divider-line {
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
-  opacity: 0.4;
-}
-.divider-icon {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 0.6rem;
-  color: var(--neon-cyan);
-  opacity: 0.6;
-  letter-spacing: 2px;
-}
-
-/* ===== MAIN CARD ===== */
-.main-card {
-  background: var(--panel-bg);
-  border: 1px solid var(--panel-border);
-  border-radius: 4px;
-  overflow: hidden;
-  position: relative;
-  margin-bottom: 16px;
-  backdrop-filter: blur(4px);
-}
-
-.main-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
-  opacity: 0.6;
-}
-
-.card-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  border-bottom: 1px solid rgba(0,245,255,0.08);
-  background: rgba(0,245,255,0.03);
-}
-
-.card-header-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--neon-green);
-  box-shadow: var(--glow-green);
-  animation: blink 1.8s ease-in-out infinite;
-}
-
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
-}
-
-.card-header-label {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 0.62rem;
-  color: var(--neon-cyan);
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  opacity: 0.7;
-}
-
-.card-body {
-  padding: 22px 16px 24px;
-}
-
-/* ===== WORD DISPLAY ===== */
-.word-display {
-  text-align: center;
-  margin-bottom: 18px;
-  padding: 18px 12px 14px;
-  position: relative;
-  background: rgba(0,0,0,0.4);
-  border-radius: 3px;
-  border: 1px solid rgba(255, 45, 120, 0.25);
-}
-
-.word-display::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 10%; right: 10%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--neon-pink), transparent);
-  opacity: 0.5;
-}
-
-.word-main {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 2.1rem;
-  font-weight: 700;
-  color: var(--neon-pink);
-  letter-spacing: 2px;
-  text-shadow: var(--glow-pink);
-  line-height: 1.1;
-  word-break: break-all;
-  animation: wordAppear 0.4s ease-out;
-}
-
-@keyframes wordAppear {
-  from { opacity: 0; transform: scale(0.9) translateY(-8px); filter: blur(4px); }
-  to { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
-}
-
-.word-defs {
-  margin-top: 10px;
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.def-tag {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 0.75rem;
-  color: var(--neon-orange);
-  background: rgba(255,107,0,0.12);
-  border: 1px solid rgba(255,107,0,0.4);
-  border-radius: 2px;
-  padding: 3px 8px;
-  text-shadow: 0 0 6px rgba(255,107,0,0.5);
-  animation: wordAppear 0.5s ease-out 0.1s both;
-}
-
-.def-separator {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 0.75rem;
-  color: rgba(200,232,255,0.4);
-  align-self: center;
-}
-
-/* ===== ROOTS SECTION ===== */
-.roots-label-row {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 8px;
-  padding: 0 2px;
-}
-
-.root-label {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 0.6rem;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--neon-cyan);
-  opacity: 0.55;
-}
-
-.roots-row {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 0;
-}
-
-.root-card {
-  flex: 1;
-  background: rgba(0, 245, 255, 0.06);
-  border: 1px solid rgba(0,245,255,0.2);
-  border-radius: 3px;
-  padding: 12px 10px;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-  transition: border-color 0.3s;
-}
-
-.root-card::after {
-  content: '';
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
-  opacity: 0.3;
-}
-
-.root-word {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--neon-green);
-  text-shadow: var(--glow-green);
-  display: block;
-  margin-bottom: 5px;
-  letter-spacing: 1px;
-}
-
-.root-def {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 0.68rem;
-  color: rgba(200,232,255,0.7);
-  line-height: 1.4;
-  font-style: italic;
-}
-
-/* Combo definition */
-.combo-section {
-  margin-top: 14px;
-  padding: 12px;
-  background: rgba(57,255,20,0.05);
-  border: 1px solid rgba(57,255,20,0.2);
-  border-radius: 3px;
-  position: relative;
-}
-
-.combo-label {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 0.58rem;
-  letter-spacing: 2px;
-  color: var(--neon-green);
-  opacity: 0.6;
-  text-transform: uppercase;
-  margin-bottom: 6px;
-}
-
-.combo-text {
-  font-family: 'Exo 2', sans-serif;
-  font-size: 0.88rem;
-  color: var(--neon-green);
-  text-shadow: 0 0 6px rgba(57,255,20,0.4);
-  font-weight: 600;
-  line-height: 1.5;
-  animation: wordAppear 0.5s ease-out 0.15s both;
-}
-
-.combo-text-alt {
-  font-family: 'Exo 2', sans-serif;
-  font-size: 0.78rem;
-  color: rgba(57,255,20,0.5);
-  font-style: italic;
-  margin-top: 3px;
-  animation: wordAppear 0.5s ease-out 0.2s both;
-}
-
-/* ===== BUTTON ===== */
-.btn-wrap {
-  padding: 20px 0 10px;
-  display: flex;
-  justify-content: center;
-}
-
-.btn-nouveau {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 0.85rem;
-  font-weight: 700;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: #03050a;
-  background: var(--neon-cyan);
-  border: none;
-  border-radius: 3px;
-  padding: 14px 36px;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  transition: all 0.2s;
-  box-shadow: 0 0 12px rgba(0,245,255,0.5), 0 0 30px rgba(0,245,255,0.2);
-  -webkit-tap-highlight-color: transparent;
-  min-width: 200px;
-}
-
-.btn-nouveau::before {
-  content: '';
-  position: absolute;
-  top: 0; left: -100%;
-  width: 100%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-  transition: left 0.4s;
-}
-
-.btn-nouveau:active::before {
-  left: 100%;
-}
-
-.btn-nouveau:active {
-  transform: scale(0.96);
-  box-shadow: 0 0 6px rgba(0,245,255,0.8), 0 0 20px rgba(0,245,255,0.4);
-}
-
-.btn-nouveau::after {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  border-radius: 3px;
-  border: 1px solid rgba(255,255,255,0.3);
-  pointer-events: none;
-}
-
-/* ===== FOOTER ===== */
-footer {
-  text-align: center;
-  padding: 16px 0 8px;
-  position: relative;
-  z-index: 2;
-}
-
-footer span {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 0.6rem;
-  color: rgba(200,232,255,0.3);
-  letter-spacing: 2px;
-  text-transform: uppercase;
-}
-
-/* Glitch effect on title hover */
-header h1:hover {
-  animation: glitch 0.3s steps(2) forwards, titlePulse 3s ease-in-out infinite 0.3s;
-}
-
-@keyframes glitch {
-  0% { text-shadow: 0 0 8px #00f5ff, 3px 0 0 rgba(255,45,120,0.7), -3px 0 0 rgba(57,255,20,0.7); }
-  25% { text-shadow: 0 0 8px #00f5ff, -3px 0 0 rgba(255,45,120,0.7), 3px 0 0 rgba(57,255,20,0.7); }
-  50% { text-shadow: 0 0 8px #00f5ff, 2px 2px 0 rgba(255,45,120,0.7), -2px -2px 0 rgba(57,255,20,0.7); }
-  100% { text-shadow: 0 0 14px #00f5ff, 0 0 40px rgba(0,245,255,0.6); }
-}
-
-/* Floating particles */
-.particle {
-  position: fixed;
-  pointer-events: none;
-  z-index: 1;
-  border-radius: 50%;
-  animation: floatUp linear infinite;
-  opacity: 0;
-}
-
-@keyframes floatUp {
-  0% { transform: translateY(100vh) scale(0); opacity: 0; }
-  10% { opacity: 1; }
-  90% { opacity: 0.6; }
-  100% { transform: translateY(-10vh) scale(1); opacity: 0; }
-}
-
-/* HUD corner element */
-.hud-corner {
-  position: fixed;
-  bottom: 16px;
-  right: 16px;
-  z-index: 3;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 3px;
-  opacity: 0.4;
-}
-
-.hud-line {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 0.5rem;
-  color: var(--neon-cyan);
-  letter-spacing: 1px;
-}
-
-/* Effet de lueur au survol */
-.root-card:hover {
-  border-color: rgba(0,245,255,0.5);
-  background: rgba(0,245,255,0.1);
-  transition: all 0.2s;
-}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  :root{
+    --bg:#0a0a0f;--teal:#5eead4;--teal-dim:rgba(94,234,212,0.15);
+    --purple:#a78bfa;--amber:#fbbf24;--rose:#fb7185;
+    --text:rgba(255,255,255,0.85);--text-mid:rgba(255,255,255,0.4);
+    --text-dim:rgba(255,255,255,0.2);--text-faint:rgba(255,255,255,0.08);
+    --border:rgba(255,255,255,0.06);--card:rgba(255,255,255,0.025);
+    /* iOS FIX: safe area variables */
+    --sat: env(safe-area-inset-top, 0px);
+    --sab: env(safe-area-inset-bottom, 0px);
+  }
+  html{
+    height:100%;overflow:hidden;
+    /* iOS FIX: forcer le fond noir directement sur html pour éviter le fond blanc/rose iOS */
+    background:#0a0a0f;
+    overscroll-behavior:none;
+  }
+  body{
+    height:100%;overflow:hidden;
+    background:#0a0a0f;
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-weight:300;
+    overscroll-behavior:none;
+    /* iOS FIX: évite la bande blanche/colorée au scroll bounce */
+    -webkit-overflow-scrolling:auto;
+  }
+  /* ── BACKGROUND ── */
+  #bg{position:fixed;inset:0;pointer-events:none;z-index:0}
+  #bg span{position:absolute;border-radius:50%;filter:blur(80px)}
+  #bg .b1{top:-20%;left:-10%;width:60%;height:60%;background:radial-gradient(circle,rgba(88,28,135,.22),transparent 70%)}
+  #bg .b2{bottom:-20%;right:-10%;width:60%;height:60%;background:radial-gradient(circle,rgba(120,53,15,.18),transparent 70%)}
+  #bg .b3{top:30%;right:20%;width:40%;height:40%;background:radial-gradient(circle,rgba(49,46,129,.12),transparent 70%)}
+  /* ── LAYOUT ── */
+  #app{position:relative;z-index:1;height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden;background:#0a0a0f}
+  .page{display:none;flex:1;overflow-y:auto;padding:56px 24px 96px;-webkit-overflow-scrolling:touch;
+    /* iOS FIX: isoler le scroll par page */
+    overscroll-behavior-y:contain;
+  }
+  .page.active{display:block}
+  /* ── TOP BAR ── */
+  /* iOS FIX: safe area pour le notch */
+  #top-bar{position:fixed;top:0;right:0;z-index:100;display:flex;gap:8px;
+    padding:calc(14px + var(--sat)) 16px 14px}
+  .top-btn{padding:5px 12px;border-radius:8px;background:rgba(255,255,255,.04);
+    border:1px solid var(--border);color:var(--text-mid);font-size:11px;letter-spacing:.1em;
+    text-transform:uppercase;cursor:pointer;transition:all .25s;
+    /* iOS FIX: supprime délai 300ms */
+    touch-action:manipulation;}
+  .top-btn:hover,.top-btn.active{background:rgba(255,255,255,.08);color:var(--text)}
+  /* ── BOTTOM NAV ── */
+  #nav{position:fixed;bottom:0;left:0;right:0;z-index:100;
+    background:rgba(10,10,15,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+    border-top:1px solid var(--border);
+    /* iOS FIX: safe area bas de l'écran */
+    padding-bottom:var(--sab);}
+  #nav ul{display:flex;justify-content:space-around;list-style:none;padding:8px 16px 12px}
+  #nav li{flex:1}
+  #nav button{width:100%;display:flex;flex-direction:column;align-items:center;gap:4px;
+    background:none;border:none;color:var(--text-dim);cursor:pointer;padding:6px;
+    border-radius:12px;transition:color .25s;font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+    touch-action:manipulation;}
+  #nav button svg{width:20px;height:20px;stroke-width:1.5}
+  #nav button.active{color:var(--teal)}
+  #nav button.active svg{stroke-width:2}
+  /* ── TYPOGRAPHY ── */
+  h1{font-size:clamp(2rem,8vw,3rem);font-weight:200;letter-spacing:-.02em;line-height:1.1}
+  .grad{background:linear-gradient(90deg,var(--teal),var(--purple),var(--amber));
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .label{font-size:10px;text-transform:uppercase;letter-spacing:.2em;color:var(--text-mid);font-weight:500}
+  .sub{font-size:11px;color:var(--text-dim);margin-top:2px}
+  /* ── CARDS ── */
+  .card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:20px}
+  .card-teal{background:linear-gradient(135deg,rgba(94,234,212,.08),rgba(34,211,238,.04),transparent)}
+  .card-purple{background:linear-gradient(135deg,rgba(167,139,250,.08),rgba(99,102,241,.04),transparent)}
+  .card-rose{background:linear-gradient(135deg,rgba(251,113,133,.08),transparent)}
+  .card-amber{background:linear-gradient(135deg,rgba(251,191,36,.08),transparent)}
+  .icon-box{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center}
+  /* ── HOME ── */
+  .stat-row{display:flex;gap:24px;margin:24px 0}
+  .stat span{font-size:28px;font-weight:200;color:rgba(255,255,255,.8)}
+  .home-cards{display:flex;flex-direction:column;gap:12px}
+  .home-card{border-radius:20px;border:1px solid var(--border);padding:20px;cursor:pointer;
+    transition:border-color .4s,transform .2s;position:relative;overflow:hidden;text-decoration:none;display:block;
+    touch-action:manipulation;}
+  .home-card:active{transform:scale(.98)}
+  .home-card-teal{background:linear-gradient(135deg,rgba(94,234,212,.08),rgba(34,211,238,.04),transparent)}
+  .home-card-purple{background:linear-gradient(135deg,rgba(167,139,250,.08),rgba(99,102,241,.04),transparent)}
+  .home-card:hover{border-color:rgba(255,255,255,.12)}
+  .card-row{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+  .home-card h2{font-size:17px;font-weight:300;color:rgba(255,255,255,.9);margin-bottom:4px}
+  .home-card p{font-size:12px;color:var(--text-mid);line-height:1.5;max-width:220px}
+  .quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+  .quick-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;cursor:pointer;transition:background .25s;
+    touch-action:manipulation;}
+  .quick-card:hover{background:rgba(255,255,255,.04)}
+  .quick-card .emoji{font-size:22px;margin-bottom:8px}
+  .quote{text-align:center;margin-top:32px;font-size:12px;color:rgba(255,255,255,.12);font-style:italic}
+  .info-btn{width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.04);
+    border:1px solid var(--border);display:flex;align-items:center;justify-content:center;
+    color:var(--text-dim);cursor:pointer;transition:all .25s;flex-shrink:0;touch-action:manipulation;}
+  .info-btn:hover{color:var(--teal);background:rgba(255,255,255,.07)}
+  /* ── BREATHE ── */
+  .breathe-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+  .settings-btn{width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,.03);
+    border:1px solid var(--border);display:flex;align-items:center;justify-content:center;
+    color:var(--text-dim);cursor:pointer;transition:all .25s;touch-action:manipulation;}
+  .settings-btn:hover,.settings-btn.open{background:rgba(255,255,255,.08);color:var(--text)}
+  .settings-btn:disabled{opacity:.3;cursor:not-allowed}
+  /* Breathing circle */
+  .circle-wrap{display:flex;justify-content:center;align-items:center;padding:20px 0}
+  .circle-outer{width:280px;height:280px;position:relative;display:flex;align-items:center;justify-content:center}
+  .ring{position:absolute;border-radius:50%;transition:transform .4s ease-in-out,opacity .4s}
+  .ring-1{inset:0;background:radial-gradient(circle,rgba(94,234,212,.06) 0%,transparent 70%)}
+  .ring-2{inset:16px;background:radial-gradient(circle,rgba(94,234,212,.1) 0%,transparent 70%)}
+  .breath-circle{width:200px;height:200px;border-radius:50%;border:1px solid rgba(255,255,255,.08);
+    display:flex;align-items:center;justify-content:center;transition:transform .1s,background .8s;
+    background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,255,255,.02))}
+  .breath-circle.inhale{background:linear-gradient(135deg,rgba(94,234,212,.3),rgba(34,211,238,.15),rgba(94,234,212,.08))}
+  .breath-circle.hold{background:linear-gradient(135deg,rgba(251,191,36,.25),rgba(251,191,36,.08))}
+  .breath-circle.exhale{background:linear-gradient(135deg,rgba(167,139,250,.25),rgba(99,102,241,.1))}
+  .breath-inner{width:128px;height:128px;border-radius:50%;background:rgba(255,255,255,.02);
+    border:1px solid rgba(255,255,255,.04);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+  .phase-label{font-size:14px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.7)}
+  .phase-timer{font-size:12px;color:var(--text-dim);font-variant-numeric:tabular-nums}
+  .session-timer{text-align:center;margin-top:16px}
+  .session-timer span{font-size:26px;font-weight:200;color:rgba(255,255,255,.45);font-variant-numeric:tabular-nums}
+  .cycle-count{font-size:10px;color:var(--text-dim);letter-spacing:.15em;text-transform:uppercase;margin-top:4px}
+  /* Controls */
+  .controls{display:flex;align-items:center;justify-content:center;gap:16px;padding:16px 0 8px}
+  .btn-main{width:64px;height:64px;border-radius:50%;border:1px solid rgba(255,255,255,.1);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+    transition:transform .2s,background .25s;color:rgba(255,255,255,.8);touch-action:manipulation;}
+  .btn-main:hover{color:#fff;transform:scale(1.05)}
+  .btn-main:active{transform:scale(.95)}
+  .btn-main-breathe{background:linear-gradient(135deg,rgba(94,234,212,.18),rgba(167,139,250,.15))}
+  .btn-main-meditate{background:linear-gradient(135deg,rgba(167,139,250,.18),rgba(251,191,36,.12))}
+  .btn-reset{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.04);
+    border:1px solid var(--border);display:flex;align-items:center;justify-content:center;
+    cursor:pointer;color:var(--text-mid);transition:color .25s;touch-action:manipulation;}
+  .btn-reset:hover{color:var(--text)}
+  /* Settings panel */
+  .settings-panel{overflow:hidden;max-height:0;transition:max-height .4s ease;margin-bottom:0}
+  .settings-panel.open{max-height:600px;margin-bottom:20px}
+  .preset-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px}
+  .preset-btn{padding:12px;border-radius:14px;border:1px solid var(--border);background:rgba(255,255,255,.02);
+    text-align:left;cursor:pointer;transition:all .25s;color:var(--text);touch-action:manipulation;}
+  .preset-btn span{display:block;font-size:13px;font-weight:400;color:rgba(255,255,255,.7)}
+  .preset-btn small{display:block;font-size:10px;color:var(--text-dim);margin-top:2px}
+  .preset-btn.active,.preset-btn:hover{background:rgba(94,234,212,.08);border-color:rgba(94,234,212,.25);color:var(--teal)}
+  .preset-btn.active span,.preset-btn:hover span{color:var(--teal)}
+  .slider-group{margin-bottom:16px}
+  .slider-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:3px;
+    border-radius:2px;background:rgba(255,255,255,.1);outline:none;cursor:pointer;}
+  /* iOS FIX: thumb plus grand pour faciliter le touch */
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;
+    border-radius:50%;cursor:pointer;border:none;}
+  .range-teal::-webkit-slider-thumb{background:var(--teal)}
+  .range-amber::-webkit-slider-thumb{background:var(--amber)}
+  .range-purple::-webkit-slider-thumb{background:var(--purple)}
+  .dur-pills{display:flex;flex-wrap:wrap;gap:8px}
+  .dur-pill{padding:6px 14px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,.02);
+    font-size:13px;color:var(--text-dim);cursor:pointer;transition:all .25s;touch-action:manipulation;}
+  .dur-pill.active,.dur-pill:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);color:var(--text)}
+  /* ── MEDITATE ── */
+  .timer-wrap{display:flex;justify-content:center;padding:20px 0}
+  .timer-svg{overflow:visible}
+  .timer-track{fill:none;stroke:rgba(255,255,255,.04);stroke-width:2}
+  .timer-prog{fill:none;stroke:url(#tg);stroke-width:2.5;stroke-linecap:round;
+    transition:stroke-dashoffset .9s linear;transform:rotate(-90deg);transform-origin:130px 130px}
+  .timer-display{text-align:center;margin-top:-10px}
+  .timer-time{font-size:52px;font-weight:200;letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:rgba(255,255,255,.88)}
+  .timer-sub{font-size:10px;text-transform:uppercase;letter-spacing:.25em;color:var(--text-dim);margin-top:4px}
+  /* Sound grid */
+  .sound-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .sound-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px;
+    border-radius:14px;border:1px solid var(--border);background:rgba(255,255,255,.02);
+    cursor:pointer;transition:all .25s;touch-action:manipulation;}
+  .sound-btn:hover{background:rgba(255,255,255,.05)}
+  .sound-btn.active{background:rgba(167,139,250,.1);border-color:rgba(167,139,250,.3)}
+  .sound-btn .s-emoji{font-size:20px}
+  .sound-btn .s-name{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim)}
+  .sound-btn.active .s-name{color:var(--purple)}
+  /* ── HISTORY ── */
+  .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:32px}
+  .stat-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;text-align:center}
+  .stat-card .val{font-size:26px;font-weight:200;color:rgba(255,255,255,.8)}
+  .stat-card .val.teal{color:rgba(94,234,212,.7)}
+  .stat-card .lbl{font-size:9px;text-transform:uppercase;letter-spacing:.15em;color:var(--text-dim);margin-top:4px}
+  .session-list{display:flex;flex-direction:column;gap:8px}
+  .session-item{display:flex;align-items:center;gap:12px;background:var(--card);
+    border:1px solid var(--border);border-radius:14px;padding:14px}
+  .s-icon{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .s-icon.breathe{background:rgba(94,234,212,.08)}
+  .s-icon.meditate{background:rgba(167,139,250,.08)}
+  .s-info{flex:1;min-width:0}
+  .s-info .s-type{font-size:13px;color:rgba(255,255,255,.65)}
+  .s-info .s-meta{font-size:10px;color:var(--text-dim);margin-top:3px}
+  .s-badge{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:rgba(94,234,212,.45);font-weight:500}
+  .empty-state{text-align:center;padding:64px 0}
+  .empty-state p{font-size:13px;color:var(--text-dim)}
+  .empty-state small{font-size:11px;color:rgba(255,255,255,.1);margin-top:6px;display:block}
+  /* ── INFO ── */
+  .info-header{display:flex;align-items:center;gap:14px;margin-bottom:24px}
+  .back-btn{width:36px;height:36px;border-radius:12px;background:rgba(255,255,255,.04);
+    border:1px solid var(--border);display:flex;align-items:center;justify-content:center;
+    color:var(--text-dim);cursor:pointer;transition:all .25s;flex-shrink:0;touch-action:manipulation;}
+  .back-btn:hover{color:var(--text);background:rgba(255,255,255,.08)}
+  .wave-viz{border-radius:20px;border:1px solid var(--border);background:linear-gradient(135deg,rgba(94,234,212,.08),rgba(167,139,250,.04),transparent);
+    padding:24px;text-align:center;margin-bottom:16px}
+  .wave-bars{display:flex;justify-content:center;align-items:flex-end;gap:4px;height:40px;margin-bottom:12px}
+  .wave-bar{width:4px;border-radius:2px;background:linear-gradient(to top,rgba(94,234,212,.2),rgba(94,234,212,.7));animation:wave 2s ease-in-out infinite}
+  @keyframes wave{0%,100%{height:4px}50%{height:36px}}
+  .info-section{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px;margin-bottom:10px}
+  .info-section-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .info-section-head .icon{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center}
+  .info-section h2{font-size:13px;font-weight:500;color:rgba(255,255,255,.8)}
+  .info-section p{font-size:13px;color:var(--text-mid);line-height:1.6}
+  .benefit-dot{width:6px;height:6px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--purple));flex-shrink:0;margin-top:5px}
+  .benefit-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}
+  .benefit-row span{font-size:13px;color:var(--text-mid)}
+  .cta-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 24px;
+    border-radius:20px;border:1px solid rgba(255,255,255,.1);
+    background:linear-gradient(135deg,rgba(94,234,212,.12),rgba(167,139,250,.1));
+    color:rgba(255,255,255,.6);font-size:13px;cursor:pointer;width:100%;margin-top:6px;transition:all .25s;
+    touch-action:manipulation;}
+  .cta-btn:hover{color:rgba(255,255,255,.85)}
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+  .page.active > *{animation:fadeUp .5s ease both}
 </style>
-
 </head>
 <body>
+<div id="bg"><span class="b1"></span><span class="b2"></span><span class="b3"></span></div>
 
-<div class="container">
-
-  <header>
-    <div class="header-beam"></div>
-    <div class="title-wrap">
-      <div class="corner-deco tl"></div>
-      <div class="corner-deco tr"></div>
-      <div class="corner-deco bl"></div>
-      <div class="corner-deco br"></div>
-      <h1>Logotron</h1>
-      <div class="title-sub">De Jean-Pierre Petit</div>
-    </div>
-  </header>
-
-  <div class="divider">
-    <div class="divider-line"></div>
-    <div class="divider-icon">◈ LEXICAL ENGINE ◈</div>
-    <div class="divider-line"></div>
-  </div>
-
-  <div class="main-card">
-    <div class="card-header">
-      <div class="card-header-dot"></div>
-      <div class="card-header-label">Mot Généré</div>
-    </div>
-    <div class="card-body">
-
-      <div class="word-display">
-        <div class="word-main" id="mot-display"></div>
-        <div class="word-defs">
-          <span class="def-tag" id="def-prefix"></span>
-          <span class="def-separator">+</span>
-          <span class="def-tag" id="def-suffix"></span>
-        </div>
-      </div>
-
-      <div class="roots-label-row">
-        <span class="root-label">⬡ Préfixe</span>
-        <span class="root-label">Suffixe ⬡</span>
-      </div>
-
-      <div class="roots-row">
-        <div class="root-card">
-          <span class="root-word" id="prefix-word"></span>
-          <span class="root-def" id="prefix-def"></span>
-        </div>
-        <div class="root-card">
-          <span class="root-word" id="suffix-word"></span>
-          <span class="root-def" id="suffix-def"></span>
-        </div>
-      </div>
-
-      <div class="combo-section">
-        <div class="combo-label">▸ Définition combinée</div>
-        <div class="combo-text" id="combo-1"></div>
-        <div class="combo-text-alt" id="combo-2"></div>
-      </div>
-
-    </div>
-  </div>
-
-  <div class="btn-wrap">
-    <button class="btn-nouveau" onclick="genererAuto()">◈ Nouveau Mot ◈</button>
-  </div>
-
+<div id="top-bar">
+  <button class="top-btn" id="lang-btn" onclick="toggleLang()">EN</button>
+  <button class="top-btn" id="info-top-btn" onclick="showInfo()" title="Info">ⓘ</button>
 </div>
 
-<footer>
-  <span>Logotron — De Jean-Pierre Petit</span>
-</footer>
+<div id="app">
+  <!-- ══ HOME ══ -->
+  <div class="page active" id="page-home">
+    <h1 id="h-find"></h1>
+    <p style="font-size:13px;color:var(--text-mid);margin-top:8px;max-width:280px;line-height:1.6" id="h-sub"></p>
 
-<div class="hud-corner">
-  <div class="hud-line">SYS: LEXGEN-9</div>
-  <div class="hud-line" id="hud-count">LOAD: 747×747</div>
-  <div class="hud-line">STATUS: ONLINE</div>
+<div class="stat-row" id="stat-row" style="display:none">
+  <div class="stat"><span id="stat-sessions">0</span><div class="label" id="h-sessions-lbl"></div></div>
+  <div style="width:1px;background:rgba(255,255,255,.1)"></div>
+  <div class="stat"><span id="stat-minutes">0</span><div class="label" id="h-minutes-lbl"></div></div>
 </div>
+
+<div class="home-cards">
+  <div class="home-card home-card-teal" onclick="navigate('breathe')">
+    <div class="card-row">
+      <div class="icon-box" style="background:rgba(94,234,212,.08)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="rgba(94,234,212,.7)" stroke-width="1.8" width="20" height="20"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M12 6v6l4 2"/></svg>
+      </div>
+      <button class="info-btn" onclick="event.stopPropagation();showInfo()" aria-label="Info">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="14" height="14"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </button>
+    </div>
+    <h2 id="h-cc-title"></h2>
+    <p id="h-cc-desc"></p>
+  </div>
+
+  <div class="home-card home-card-purple" onclick="navigate('meditate')">
+    <div class="icon-box" style="background:rgba(167,139,250,.08);margin-bottom:12px">
+      <svg viewBox="0 0 24 24" fill="none" stroke="rgba(167,139,250,.7)" stroke-width="1.8" width="20" height="20"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    </div>
+    <h2 id="h-med-title"></h2>
+    <p id="h-med-desc"></p>
+  </div>
+
+  <div class="quick-grid">
+    <div class="quick-card" onclick="quickStart(5,0,5,3)">
+      <div class="emoji">🫁</div>
+      <p style="font-size:12px;font-weight:400;color:rgba(255,255,255,.6)" id="h-q1"></p>
+      <p style="font-size:10px;color:var(--text-dim);margin-top:2px" id="h-q1d"></p>
+    </div>
+    <div class="quick-card" onclick="quickStart(4,7,8,10)">
+      <div class="emoji">😴</div>
+      <p style="font-size:12px;font-weight:400;color:rgba(255,255,255,.6)" id="h-q2"></p>
+      <p style="font-size:10px;color:var(--text-dim);margin-top:2px" id="h-q2d"></p>
+    </div>
+  </div>
+</div>
+<div class="quote" id="h-quote"></div>
+
+  </div>
+
+  <!-- ══ BREATHE ══ -->
+
+  <div class="page" id="page-breathe">
+    <div class="breathe-header">
+      <div>
+        <div style="font-size:20px;font-weight:200;color:rgba(255,255,255,.9)" id="b-title"></div>
+        <div class="sub" id="b-pattern-sub"></div>
+      </div>
+      <button class="settings-btn" id="settings-toggle" onclick="toggleSettings()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="18" height="18"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+    </div>
+
+<div class="settings-panel" id="settings-panel">
+  <div class="label" style="margin-bottom:10px" id="b-pattern-lbl"></div>
+  <div class="preset-grid" id="preset-grid"></div>
+  <div class="slider-group">
+    <div class="slider-row"><span class="label" id="b-inhale-lbl"></span><span style="font-size:12px;color:rgba(94,234,212,.6)" id="inhale-val"></span></div>
+    <input type="range" id="inhale-range" class="range-teal" min="2" max="10" step="1" value="5" oninput="updateSlider('inhale',this.value)">
+  </div>
+  <div class="slider-group">
+    <div class="slider-row"><span class="label" id="b-hold-lbl"></span><span style="font-size:12px;color:rgba(251,191,36,.6)" id="hold-val"></span></div>
+    <input type="range" id="hold-range" class="range-amber" min="0" max="10" step="1" value="0" oninput="updateSlider('hold',this.value)">
+  </div>
+  <div class="slider-group">
+    <div class="slider-row"><span class="label" id="b-exhale-lbl"></span><span style="font-size:12px;color:rgba(167,139,250,.6)" id="exhale-val"></span></div>
+    <input type="range" id="exhale-range" class="range-purple" min="2" max="10" step="1" value="5" oninput="updateSlider('exhale',this.value)">
+  </div>
+  <div class="label" style="margin-bottom:10px;margin-top:4px" id="b-dur-lbl"></div>
+  <div class="dur-pills" id="dur-pills"></div>
+</div>
+
+<div class="circle-wrap">
+  <div class="circle-outer">
+    <div class="ring ring-1" id="ring1"></div>
+    <div class="ring ring-2" id="ring2"></div>
+    <div class="breath-circle" id="breath-circle">
+      <div class="breath-inner">
+        <div class="phase-label" id="phase-label"></div>
+        <div class="phase-timer" id="phase-timer"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="session-timer" id="session-timer-wrap" style="display:none">
+  <span id="session-timer-disp"></span>
+  <div class="cycle-count" id="cycle-label"></div>
+</div>
+
+<div class="controls">
+  <button class="btn-reset" id="breathe-reset" onclick="breatheReset()" style="display:none">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="18" height="18"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+  </button>
+  <button class="btn-main btn-main-breathe" id="breathe-play" onclick="breatheToggle()">
+    <svg id="breathe-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="24" height="24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+  </button>
+</div>
+
+  </div>
+
+  <!-- ══ MEDITATE ══ -->
+
+  <div class="page" id="page-meditate">
+    <div style="margin-bottom:16px">
+      <div style="font-size:20px;font-weight:200;color:rgba(255,255,255,.9)" id="m-title"></div>
+      <div class="sub" id="m-sub"></div>
+    </div>
+
+<div id="m-dur-section">
+  <div class="label" style="margin-bottom:10px" id="m-dur-lbl"></div>
+  <div class="dur-pills" id="m-dur-pills"></div>
+</div>
+
+<div class="timer-wrap">
+  <div>
+    <svg class="timer-svg" width="260" height="260" viewBox="0 0 260 260">
+      <defs>
+        <linearGradient id="tg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#5eead4"/>
+          <stop offset="50%" stop-color="#a78bfa"/>
+          <stop offset="100%" stop-color="#fbbf24"/>
+        </linearGradient>
+      </defs>
+      <circle class="timer-track" cx="130" cy="130" r="120"/>
+      <circle class="timer-prog" id="timer-ring" cx="130" cy="130" r="120"
+        stroke-dasharray="753.98" stroke-dashoffset="753.98"/>
+    </svg>
+    <div class="timer-display" style="margin-top:-148px;padding-bottom:100px">
+      <div class="timer-time" id="timer-disp">10:00</div>
+      <div class="timer-sub" id="timer-sub-lbl"></div>
+    </div>
+  </div>
+</div>
+
+<div id="m-sound-section" style="margin-bottom:20px">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+    <svg id="vol-icon" viewBox="0 0 24 24" fill="none" stroke="var(--text-mid)" stroke-width="1.6" width="14" height="14"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+    <span class="label" id="m-sound-lbl"></span>
+  </div>
+  <div class="sound-grid" id="sound-grid"></div>
+</div>
+
+<div class="controls">
+  <button class="btn-reset" id="meditate-reset" onclick="meditateReset()" style="display:none">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="18" height="18"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+  </button>
+  <button class="btn-main btn-main-meditate" id="meditate-play" onclick="meditateToggle()">
+    <svg id="meditate-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="24" height="24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+  </button>
+</div>
+
+  </div>
+
+  <!-- ══ HISTORY ══ -->
+
+  <div class="page" id="page-history">
+    <div style="font-size:20px;font-weight:200;color:rgba(255,255,255,.9);margin-bottom:2px" id="hi-title"></div>
+    <div class="sub" id="hi-sub"></div>
+    <div class="stats-grid" style="margin-top:20px">
+      <div class="stat-card"><div class="val" id="hi-total">0</div><div class="lbl" id="hi-sessions-lbl"></div></div>
+      <div class="stat-card"><div class="val" id="hi-minutes">0</div><div class="lbl" id="hi-minutes-lbl"></div></div>
+      <div class="stat-card"><div class="val teal" id="hi-breathe">0</div><div class="lbl" id="hi-breathe-lbl"></div></div>
+    </div>
+    <div class="session-list" id="session-list"></div>
+  </div>
+
+  <!-- ══ INFO ══ -->
+
+  <div class="page" id="page-info">
+    <div class="info-header">
+      <button class="back-btn" onclick="navigate('home')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="16" height="16"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div>
+        <div style="font-size:20px;font-weight:200;color:rgba(255,255,255,.9)" id="i-title"></div>
+        <div class="sub" id="i-sub"></div>
+      </div>
+    </div>
+
+<div class="wave-viz">
+  <div class="wave-bars" id="wave-bars"></div>
+  <div style="font-size:12px;color:var(--text-mid)">0.1 Hz · 6 breaths/min</div>
+  <div style="font-size:10px;color:rgba(255,255,255,.12);margin-top:3px;text-transform:uppercase;letter-spacing:.15em">Resonance frequency</div>
+</div>
+
+<div id="info-sections"></div>
+
+<div class="info-section" style="margin-bottom:10px">
+  <div class="info-section-head">
+    <div class="icon" style="background:rgba(94,234,212,.08)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="rgba(94,234,212,.6)" stroke-width="1.8" width="16" height="16"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    </div>
+    <h2 id="i-benefits-title"></h2>
+  </div>
+  <div id="benefits-list"></div>
+</div>
+
+<button class="cta-btn" onclick="navigate('breathe')">
+  <svg viewBox="0 0 24 24" fill="none" stroke="rgba(94,234,212,.5)" stroke-width="1.8" width="14" height="14"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+  <span id="i-cta"></span>
+</button>
+
+<div style="text-align:center;margin-top:28px;padding-bottom:8px">
+  <div style="font-size:10px;text-transform:uppercase;letter-spacing:.2em;color:rgba(255,255,255,.12);margin-bottom:4px">Créé par</div>
+  <div style="font-size:13px;font-weight:300;color:rgba(255,255,255,.25);letter-spacing:.05em">Murphy Ramusovic</div>
+</div>
+
+  </div>
+</div>
+
+<!-- ══ BOTTOM NAV ══ -->
+
+<nav id="nav">
+  <ul>
+    <li><button id="nav-home" onclick="navigate('home')" class="active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span id="nav-home-lbl"></span>
+    </button></li>
+    <li><button id="nav-breathe" onclick="navigate('breathe')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <span id="nav-breathe-lbl"></span>
+    </button></li>
+    <li><button id="nav-meditate" onclick="navigate('meditate')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span id="nav-meditate-lbl"></span>
+    </button></li>
+    <li><button id="nav-history" onclick="navigate('history')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+      <span id="nav-history-lbl"></span>
+    </button></li>
+  </ul>
+</nav>
 
 <script>
-// =====================================================================
-// BASE DE DONNÉES : Préfixes et Suffixes grecs/latins
-// =====================================================================
-const prefixes = [
-  { mot: "a", def: "sans" },
-  { mot: "poly", def: "multiple" },
-  { mot: "bio", def: "la vie" },
-  { mot: "hydro", def: "l'eau" },
-  { mot: "micro", def: "petit(e)" },
-  { mot: "mono", def: "unique" },
-  { mot: "di", def: "double" },
-  { mot: "dys", def: "le trouble" },
-  { mot: "photo", def: "la lumière" },
-  { mot: "hypo", def: "inférieur(e)" },
-  { mot: "épi", def: "sur" },
-  { mot: "radio", def: "le rayonnement" },
-  { mot: "hyper", def: "audessus" },
-  { mot: "para", def: "à coté" },
-  { mot: "géo", def: "la terre" },
-  { mot: "iso", def: "identique" },
-  { mot: "péri", def: "autour" },
-  { mot: "anti", def: "contre" },
-  { mot: "électro", def: "l'ambre > l'électricité" },
-  { mot: "hétéro", def: "l'autre" },
-  { mot: "psycho", def: "l'âme" },
-  { mot: "zoo", def: "l'animal" },
-  { mot: "tri", def: "triple" },
-  { mot: "neuro", def: "les nerfs" },
-  { mot: "cyto", def: "la cellule" },
-  { mot: "auto", def: "de soimême" },
-  { mot: "thermo", def: "la chaleur" },
-  { mot: "dia", def: "à travers" },
-  { mot: "ortho", def: "droit(e)" },
-  { mot: "endo", def: "à l'intérieur" },
-  { mot: "homo", def: "identique" },
-  { mot: "pro", def: "devant / en faveur de / à la place de" },
-  { mot: "an", def: "sans" },
-  { mot: "syn", def: "avec" },
-  { mot: "myo", def: "la souris > le muscle" },
-  { mot: "cardio", def: "le cœur" },
-  { mot: "méta", def: "audelà / après" },
-  { mot: "anthropo", def: "l'homme" },
-  { mot: "télé", def: "à distance" },
-  { mot: "aéro", def: "l'air" },
-  { mot: "ostéo", def: "l'os" },
-  { mot: "hémi", def: "à moitié" },
-  { mot: "hémo", def: "le sang" },
-  { mot: "phyto", def: "le végétal" },
-  { mot: "ana", def: "l'autre / à travers / à nouveau / vers le haut" },
-  { mot: "pyro", def: "le feu" },
-  { mot: "litho", def: "la pierre" },
-  { mot: "macro", def: "grand(e)" },
-  { mot: "néo", def: "nouveau (velle)" },
-  { mot: "gastro", def: "le ventre" },
-  { mot: "patho", def: "la maladie" },
-  { mot: "paléo", def: "l'ancien(ne)" },
-  { mot: "blast", def: "le germe" },
-  { mot: "hélio", def: "le soleil" },
-  { mot: "leuco", def: "blanc(he)" },
-  { mot: "bi", def: "double" },
-  { mot: "méso", def: "le milieu" },
-  { mot: "physio", def: "le corps" },
-  { mot: "con", def: "avec" },
-  { mot: "dé", def: "enlever" },
-  { mot: "par", def: "à travers / de part en part / terminer / intense" },
-  { mot: "éco", def: "la maison > l'écologie / l'économie" },
-  { mot: "socio", def: "partagé(e)" },
-  { mot: "chrono", def: "le temps" },
-  { mot: "cysto", def: "la vessie > la vésicule" },
-  { mot: "astro", def: "le ciel" },
-  { mot: "stéréo", def: "solide > robuste / le relief" },
-  { mot: "eu", def: "bien / véritable" },
-  { mot: "exo", def: "en dehors" },
-  { mot: "cyclo", def: "la roue" },
-  { mot: "angio", def: "le vaisseau" },
-  { mot: "encéphalo", def: "le cerveau" },
-  { mot: "érythro", def: "rouge" },
-  { mot: "hémato", def: "le sang" },
-  { mot: "immuno", def: "la défense" },
-  { mot: "lipo", def: "la graisse" },
-  { mot: "morpho", def: "la forme" },
-  { mot: "apo", def: "hors" },
-  { mot: "entéro", def: "l'intestin" },
-  { mot: "myélo", def: "la moelle" },
-  { mot: "oxy", def: "aigu(e) > l'oxygène" },
-  { mot: "tétra", def: "quatre" },
-  { mot: "co", def: "avec" },
-  { mot: "crypto", def: "caché(e)" },
-  { mot: "allo", def: "l'autre" },
-  { mot: "chromo", def: "la couleur" },
-  { mot: "cryo", def: "froid(e)" },
-  { mot: "lympho", def: "liquide" },
-  { mot: "chromat", def: "la couleur" },
-  { mot: "holo", def: "entier(e)" },
-  { mot: "pan", def: "de tout" },
-  { mot: "pneumo", def: "le poumon" },
-  { mot: "psych", def: "l'âme" },
-  { mot: "cata", def: "vers le bas" },
-  { mot: "pseudo", def: "faux > presque" },
-  { mot: "ethno", def: "le peuple" },
-  { mot: "fibro", def: "à l'extrémité > la fibre" },
-  { mot: "hépato", def: "le foie" },
-  { mot: "histo", def: "la trame / le tissu" },
-  { mot: "phono", def: "la voix" },
-  { mot: "rhino", def: "le nez" },
-  { mot: "techno", def: "la technique" },
-  { mot: "typo", def: "l'empreinte" },
-  { mot: "écho", def: "l'écho" },
-  { mot: "magnéto", def: "l'aimant" },
-  { mot: "pharmaco", def: "le médicament" },
-  { mot: "théo", def: "le divin" },
-  { mot: "tricho", def: "le poil" },
-  { mot: "chondro", def: "le cartilage" },
-  { mot: "cyst", def: "la vessie > la vésicule" },
-  { mot: "dermato", def: "la peau" },
-  { mot: "dermo", def: "la peau" },
-  { mot: "halo", def: "le sel / la mer" },
-  { mot: "néphro", def: "le rein" },
-  { mot: "oligo", def: "parcimonieux (euse)" },
-  { mot: "philo", def: "l'amour" },
-  { mot: "uro", def: "l'urine" },
-  { mot: "multi", def: "plusieurs" },
-  { mot: "organo", def: "l'organe" },
-  { mot: "proto", def: "premier(ère)" },
-  { mot: "topo", def: "le lieu" },
-  { mot: "tox", def: "toxique" },
-  { mot: "acro", def: "élevé(e) / extrême" },
-  { mot: "chlor", def: "chloré(e)" },
-  { mot: "cholé", def: "la bile" },
-  { mot: "métall", def: "le métal" },
-  { mot: "métro", def: "la matrice" },
-  { mot: "pré", def: "avant" },
-  { mot: "card", def: "le cœur" }
-];
+/* ══════════════════════════════════════════════
+   SAFE STORAGE — iOS Safari private mode fix
+══════════════════════════════════════════════ */
+const SafeStorage={
+  _m:{},
+  get(k){try{return localStorage.getItem(k)}catch{return this._m[k]||null}},
+  set(k,v){try{localStorage.setItem(k,v)}catch{this._m[k]=v}}
+};
 
-// Version simplifiée des suffixes pour l'exemple
-const suffixes = [
-  { mot: "logie", def: "étude" },
-  { mot: "ique", def: "à propos" },
-  { mot: "graphie", def: "écriture" },
-  { mot: "logique", def: "étude" },
-  { mot: "mètre", def: "mesureur" },
-  { mot: "ite", def: "inflammation" },
-  { mot: "métrie", def: "mesure" },
-  { mot: "gène", def: "générateur / origine" },
-  { mot: "logue", def: "spécialiste / discours" },
-  { mot: "graphique", def: "écriture" },
-  { mot: "graphe", def: "qui écrit" },
-  { mot: "gramme", def: "écriture" },
-  { mot: "ïde", def: "apparence" },
-  { mot: "métrique", def: "mesurage" },
-  { mot: "pathie", def: "maladie" },
-  { mot: "thérapie", def: "médecine" },
-  { mot: "logiste", def: "spécialiste" },
-  { mot: "genèse", def: "création" },
-  { mot: "lyse", def: "décomposition" },
-  { mot: "ome", def: "tumeur" },
-  { mot: "scopie", def: "examen" },
-  { mot: "scope", def: "visionneuse" },
-  { mot: "tomie", def: "découpe" }
-];
+/* ══════════════════════════════════════════════
+   TRANSLATIONS
+══════════════════════════════════════════════ */
+const TR = {
+  en:{
+    home:'Home',breathe:'Breathe',meditate:'Meditate',history:'History',
+    findYour:'Find your',calm:'calm',
+    sub:'Breathe deeply, meditate mindfully, and reconnect with yourself.',
+    sessions:'Sessions',minutes:'Minutes',
+    ccTitle:'Cardiac Coherence',ccDesc:'Synchronize your heart and breath with guided patterns',
+    medTitle:'Meditation Timer',medDesc:'Customizable timer with ambient sounds for deep meditation',
+    q1:'5-5 Quick',q1d:'3 min session',q2:'4-7-8 Sleep',q2d:'10 min session',
+    quote:'"The quieter you become, the more you can hear."',
+    pattern:'Pattern',dur:'Duration',inhale:'Inhale',hold:'Hold',exhale:'Exhale',
+    ready:'Ready',cycle:'Cycle',remaining:'remaining',
+    coherence:'Coherence',coherenceD:'Cardiac coherence (5-5)',
+    relaxing:'Relaxing',relaxingD:'Deep relaxation (4-7-8)',
+    energizing:'Energizing',energizingD:'Quick energize (6-2)',
+    box:'Box',boxD:'Box breathing (4-4-4)',
+    sound:'Ambient Sound',
+    silence:'Silence',rain:'Rain',ocean:'Ocean',forest:'Forest',
+    fire:'Fire',wind:'Wind',bells:'Tibetan',night:'OM',
+    hiTitle:'History',hiSub:'Your mindfulness journey',
+    breathing:'Breathing',meditation:'Meditation',
+    noSessions:'No sessions yet',startFirst:'Start your first meditation',done:'Done',
+    iTitle:'Cardiac Coherence',iSub:'The science of heart-breath synchrony',
+    whatQ:'What is cardiac coherence?',
+    whatA:'Cardiac coherence is a state of optimal harmony between the heart and the nervous system. When you breathe at ~6 breaths per minute (5s inhale, 5s exhale), your heart rate synchronizes with your breathing rhythm — creating a wave of coherence throughout your body.',
+    howQ:'How does it work?',
+    howA:'The vagus nerve connects your brain to your heart. Slow rhythmic breathing activates the parasympathetic nervous system, lowering cortisol, reducing blood pressure, and inducing calm alertness. This state is measurable via Heart Rate Variability (HRV).',
+    practiceQ:'The 365 method',
+    practiceA:'3 times a day, 6 breaths per minute, for 5 minutes. This protocol, backed by HeartMath Institute research, is enough to maintain cardiac coherence throughout your day.',
+    scienceQ:'Scientific basis',
+    scienceA:'Validated by numerous clinical studies, cardiac coherence is used in cardiology, sports medicine and psychiatry. The 5-5 pattern at exactly 0.1 Hz is the resonance frequency of the cardiovascular system.',
+    benefits:'Benefits',
+    b1:'Reduces stress and anxiety',b2:'Improves emotional regulation',
+    b3:'Lowers blood pressure',b4:'Boosts immune system',
+    b5:'Enhances focus and clarity',b6:'Improves sleep quality',
+    cta:'Try it now'
+  },
+  fr:{
+    home:'Accueil',breathe:'Respirer',meditate:'Méditer',history:'Historique',
+    findYour:'Trouvez votre',calm:'calme',
+    sub:'Respirez profondément, méditez pleinement, et reconnectez-vous à vous-même.',
+    sessions:'Séances',minutes:'Minutes',
+    ccTitle:'Cohérence Cardiaque',ccDesc:'Synchronisez votre cœur et votre souffle avec des rythmes guidés',
+    medTitle:'Minuteur de Méditation',medDesc:'Minuteur personnalisable avec sons ambiants pour une méditation profonde',
+    q1:'Rapide 5-5',q1d:'Séance de 3 min',q2:'Sommeil 4-7-8',q2d:'Séance de 10 min',
+    quote:'« Plus vous devenez silencieux, plus vous pouvez entendre. »',
+    pattern:'Rythme',dur:'Durée',inhale:'Inspirez',hold:'Retenez',exhale:'Expirez',
+    ready:'Prêt',cycle:'Cycle',remaining:'restant',
+    coherence:'Cohérence',coherenceD:'Cohérence cardiaque (5-5)',
+    relaxing:'Relaxant',relaxingD:'Détente profonde (4-7-8)',
+    energizing:'Énergisant',energizingD:'Revitaliser (6-2)',
+    box:'Carré',boxD:'Respiration carrée (4-4-4)',
+    sound:'Son Ambiant',
+    silence:'Silence',rain:'Pluie',ocean:'Vagues',forest:'Oiseaux',
+    fire:'Flammes',wind:'Vent',bells:'Tibétain',night:'OM',
+    hiTitle:'Historique',hiSub:'Votre parcours de pleine conscience',
+    breathing:'Respiration',meditation:'Méditation',
+    noSessions:'Aucune séance pour le moment',startFirst:'Commencez votre première méditation',done:'Terminé',
+    iTitle:'Cohérence Cardiaque',iSub:'La science de la synchronie cœur-souffle',
+    whatQ:"Qu'est-ce que la cohérence cardiaque ?",
+    whatA:"La cohérence cardiaque est un état d'harmonie optimale entre le cœur et le système nerveux. En respirant à ~6 cycles par minute (5s inspiration, 5s expiration), votre rythme cardiaque se synchronise avec votre rythme respiratoire — créant une vague de cohérence dans tout votre corps.",
+    howQ:'Comment ça fonctionne ?',
+    howA:"Le nerf vague relie votre cerveau à votre cœur. La respiration lente active le système nerveux parasympathique, abaissant le cortisol, réduisant la pression artérielle et induisant un état de calme vigilant. Mesurable via la Variabilité de Fréquence Cardiaque (VFC).",
+    practiceQ:'La méthode 365',
+    practiceA:"3 fois par jour, 6 respirations par minute, pendant 5 minutes. Ce protocole, validé par l'Institut HeartMath, suffit à maintenir un état de cohérence cardiaque toute la journée.",
+    scienceQ:'Bases scientifiques',
+    scienceA:"Validée par de nombreuses études cliniques, la cohérence cardiaque est utilisée en cardiologie, médecine du sport et psychiatrie. Le rythme 5-5 à exactement 0,1 Hz correspond à la fréquence de résonance du système cardiovasculaire.",
+    benefits:'Bienfaits',
+    b1:"Réduit le stress et l'anxiété",b2:'Améliore la régulation émotionnelle',
+    b3:'Abaisse la pression artérielle',b4:'Renforce le système immunitaire',
+    b5:'Améliore la concentration et la clarté',b6:'Améliore la qualité du sommeil',
+    cta:'Essayer maintenant'
+  }
+};
 
-function getPrefixe(n) {
-  return prefixes[(n - 1) % prefixes.length];
+let lang = SafeStorage.get('rr-lang') || 'fr';
+const t = k => TR[lang][k] || TR.en[k] || k;
+
+function toggleLang(){
+  lang = lang==='fr' ? 'en' : 'fr';
+  SafeStorage.set('rr-lang', lang);
+  document.getElementById('lang-btn').textContent = lang==='fr' ? 'EN' : 'FR';
+  renderAll();
 }
 
-function getSuffixe(n) {
-  return suffixes[(n - 1) % suffixes.length];
+/* ══════════════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════════════ */
+let currentPage = 'home';
+
+function navigate(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  const navBtn=document.getElementById('nav-'+page);
+  if(navBtn) navBtn.classList.add('active');
+  currentPage=page;
+  if(page==='history') renderHistory();
+  if(page==='info') renderInfo();
+  window.scrollTo(0,0);
 }
 
-function randInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+function showInfo(){ navigate('info'); }
+
+function quickStart(i,h,e,dur){
+  breatheInhale=i; breatheHold=h; breatheExhale=e; breatheDuration=dur;
+  document.getElementById('inhale-range').value=i;
+  document.getElementById('hold-range').value=h;
+  document.getElementById('exhale-range').value=e;
+  updateSliderDisplays();
+  updatePresetHighlight();
+  renderDurPills();
+  navigate('breathe');
+  setTimeout(breatheStart,300);
 }
 
-function genererAuto() {
-  const pi = randInt(1, prefixes.length);
-  const si = randInt(1, suffixes.length);
-  const p = getPrefixe(pi);
-  const s = getSuffixe(si);
+/* ══════════════════════════════════════════════
+   SOUND ENGINE
+   iOS FIX: AudioContext doit être créé/resumé
+   de façon SYNCHRONE dans un event handler.
+   On utilise un flag audioUnlocked et on appelle
+   unlockAudio() au début de chaque onclick.
+══════════════════════════════════════════════ */
+let audioCtx=null, masterGain=null, activeNodes=[], bellsTimeout=null, currentSoundId='none';
 
-  // Animation refresh
-  const motEl = document.getElementById('mot-display');
-  motEl.style.animation = 'none';
-  motEl.offsetHeight;
-  motEl.style.animation = '';
+/* ── VRAIS SONS (Pixabay CDN — licence Pixabay Content License, libre d'utilisation) ── */
+/* ── VRAIS SONS — Internet Archive (domaine public / CC0) ──
+   Oiseaux : bird-sound-effects-ringtones (peacefl0wer) — CC0, fichier court 234 KB
+   Feu      : WilliamDyerSoundEffectsLibrary — CC0, USC, 154 KB 64kbps
+   Vent     : WindSounds (achraf19, 2017) — community audio, VBR MP3
+   OM       : OmChanting (vakmumbai, 2008) — community audio, 64kbps
+*/
+const REAL_SOUNDS={
+  forest:'https://archive.org/download/bird-sound-effects-ringtones/birds-in-the-morning.mp3',
+  fire:  'https://archive.org/download/WilliamDyerSoundEffectsLibrary/crackling_fire_64kb.mp3',
+  wind:  'https://archive.org/download/WindSounds/WindSounds_vbr.mp3',
+  night: 'https://archive.org/download/OmChanting/OmChanting_64kb.mp3',
+};
+let realAudioEl=null; // HTMLAudioElement actif pour les vrais sons
 
-  document.getElementById('mot-display').textContent = p.mot + s.mot;
-  document.getElementById('def-prefix').textContent = p.def;
-  document.getElementById('def-suffix').textContent = s.def;
-  document.getElementById('prefix-word').textContent = p.mot;
-  document.getElementById('prefix-def').textContent = p.def;
-  document.getElementById('suffix-word').textContent = s.mot;
-  document.getElementById('suffix-def').textContent = s.def;
-  document.getElementById('combo-1').textContent = p.def + ' ' + s.def;
-  document.getElementById('combo-2').textContent = 'ou : ' + s.def + ' ' + p.def;
-  
-  // Mise à jour du compteur HUD
-  document.getElementById('hud-count').textContent = `LOAD: ${prefixes.length}×${suffixes.length}`;
+/* Appelé synchronement depuis chaque bouton qui peut jouer du son */
+function unlockAudio(){
+  if(!audioCtx){
+    try{
+      audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+      masterGain=audioCtx.createGain();
+      masterGain.gain.value=0.7;
+      masterGain.connect(audioCtx.destination);
+    }catch(e){ return false; }
+  }
+  if(audioCtx.state==='suspended'){
+    // Appel synchrone impératif sur iOS
+    audioCtx.resume();
+  }
+  return audioCtx.state!=='closed';
 }
 
-// Particules flottantes
-function createParticle() {
-  const p = document.createElement('div');
-  p.className = 'particle';
-  const colors = ['#00f5ff','#ff2d78','#39ff14','#ff6b00'];
-  const color = colors[Math.floor(Math.random() * colors.length)];
-  const size = Math.random() * 3 + 1;
-  p.style.cssText = `
-    left: ${Math.random()*100}%;
-    width: ${size}px;
-    height: ${size}px;
-    background: ${color};
-    box-shadow: 0 0 ${size*2}px ${color};
-    animation-duration: ${Math.random()*8+6}s;
-    animation-delay: ${Math.random()*5}s;
-  `;
-  document.body.appendChild(p);
-  setTimeout(() => p.remove(), 14000);
+function makeNoise(type){
+  if(!audioCtx) return null;
+  const sr=audioCtx.sampleRate, len=sr*4;
+  const buf=audioCtx.createBuffer(1,len,sr);
+  const d=buf.getChannelData(0);
+  if(type==='white'){
+    for(let i=0;i<len;i++) d[i]=Math.random()*2-1;
+  }else if(type==='pink'){
+    let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
+    for(let i=0;i<len;i++){
+      const w=Math.random()*2-1;
+      b0=0.99886*b0+w*0.0555179;b1=0.99332*b1+w*0.0750759;
+      b2=0.96900*b2+w*0.1538520;b3=0.86650*b3+w*0.3104856;
+      b4=0.55000*b4+w*0.5329522;b5=-0.7616*b5-w*0.0168980;
+      d[i]=(b0+b1+b2+b3+b4+b5+b6+w*0.5362)*0.11;b6=w*0.115926;
+    }
+  }else{
+    let last=0;
+    for(let i=0;i<len;i++){
+      const w=Math.random()*2-1;
+      d[i]=(last+0.02*w)/1.02;last=d[i];d[i]*=3.5;
+    }
+  }
+  const src=audioCtx.createBufferSource();
+  src.buffer=buf;src.loop=true;src.start(0);
+  activeNodes.push(src);
+  return src;
 }
 
-setInterval(createParticle, 1800);
+function filt(node,type,freq,Q=1){
+  if(!node||!audioCtx) return null;
+  const f=audioCtx.createBiquadFilter();
+  f.type=type;f.frequency.value=freq;f.Q.value=Q;
+  node.connect(f);return f;
+}
 
-// Initialisation
-genererAuto();
+function mkGain(node,val){
+  if(!node||!audioCtx) return null;
+  const g=audioCtx.createGain();g.gain.value=val;
+  node.connect(g);return g;
+}
+
+function lfo(param,rate,depth){
+  if(!audioCtx||!param) return;
+  const l=audioCtx.createOscillator(),lg=audioCtx.createGain();
+  l.frequency.value=rate;lg.gain.value=depth;
+  l.connect(lg);lg.connect(param);l.start();
+  activeNodes.push(l);
+}
+
+function buildSound(id,out){
+  if(!audioCtx||!out) return;
+
+  if(id==='rain'){
+    // Pluie — inchangé, déjà bon
+    const g=mkGain(filt(filt(makeNoise('white'),'highpass',2000,.3),'bandpass',5000,.5),0.4);
+    if(g) g.connect(out);
+    const g2=mkGain(filt(makeNoise('pink'),'lowpass',800,.8),0.15);
+    if(g2) g2.connect(out);
+
+  }else if(id==='ocean'){
+    // Vagues : bruit marron filtré avec LFO lent simulant le déferlement
+    const wave=()=>{
+      const n=makeNoise('brown');
+      const lp=filt(n,'lowpass',500,.8);
+      const hp=filt(lp,'highpass',60,.5);
+      const g=mkGain(hp,0.5);
+      if(g){lfo(g.gain,0.09,0.35);g.connect(out);}
+    };
+    wave();wave(); // deux couches décalées
+    // Écume haute fréquence
+    const foam=mkGain(filt(makeNoise('pink'),'bandpass',2200,1.5),0.07);
+    if(foam){lfo(foam.gain,0.11,0.06);foam.connect(out);}
+    // Grondement profond
+    const deep=mkGain(filt(makeNoise('brown'),'lowpass',120),0.25);
+    if(deep){lfo(deep.gain,0.07,0.18);deep.connect(out);}
+
+  }else if(id==='forest'||id==='fire'||id==='wind'||id==='night'){
+    // VRAIS SONS — joués via HTMLAudioElement (iOS compatible, loop natif)
+    playRealSound(id);
+
+  }else if(id==='bells'){
+    // Bols tibétains — inchangé, déjà bien
+    const freqs=[220,293.66,349.23,440,523.25];
+    const sched=()=>{
+      if(currentSoundId!=='bells'||!audioCtx) return;
+      const f=freqs[Math.floor(Math.random()*freqs.length)]*(Math.random()>.5?2:1);
+      const osc=audioCtx.createOscillator();const env=audioCtx.createGain();
+      osc.type='sine';osc.frequency.value=f;
+      env.gain.setValueAtTime(0.12,audioCtx.currentTime);
+      env.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+4);
+      osc.connect(env);env.connect(out);osc.start();osc.stop(audioCtx.currentTime+4.5);
+      activeNodes.push(osc);
+      bellsTimeout=setTimeout(sched,2000+Math.random()*5000);
+    };
+    sched();
+
+  }
+}
+
+/*
+ * iOS FIX CRITIQUE pour les sons :
+ * Le problème "son de 1 seconde" vient du fait que stopSound()
+ * utilisait async/await et recréait masterGain après un délai —
+ * ce qui coupait les nouveaux noeuds déjà connectés.
+ * Solution : fade-out propre sans recréer masterGain trop tôt,
+ * et conserver les noeuds actifs séparément.
+ */
+
+/* ── VRAI SON via HTMLAudioElement ── */
+function playRealSound(id){
+  stopRealSound();
+  const url=REAL_SOUNDS[id];
+  if(!url) return;
+  const el=new Audio();
+  el.crossOrigin='anonymous';
+  el.loop=true;
+  el.volume=0.7;
+  el.preload='auto';
+  // iOS: on doit déclencher .play() directement dans l'event handler.
+  // playRealSound est appelé depuis buildSound → depuis playSound → depuis onclick. ✓
+  el.src=url;
+  el.onerror=()=>{
+    // Si le fichier ne charge pas, fallback sur la synthèse
+    console.warn('Real sound failed, using synth fallback for',id);
+    buildSoundSynth(id, masterGain);
+  };
+  const p=el.play();
+  if(p&&p.catch) p.catch(()=>buildSoundSynth(id,masterGain));
+  realAudioEl=el;
+  // Connecter aussi au masterGain pour le fade (MediaElementSourceNode)
+  if(audioCtx){
+    try{
+      const src=audioCtx.createMediaElementSource(el);
+      src.connect(masterGain);
+      activeNodes.push({stop:()=>{try{el.pause()}catch{}}});
+    }catch(e){
+      // Si MediaElementSource déjà créé ou erreur, audio joue quand même via el.volume
+    }
+  }
+}
+
+function stopRealSound(){
+  if(realAudioEl){
+    try{realAudioEl.pause();realAudioEl.src='';}catch{}
+    realAudioEl=null;
+  }
+}
+
+/* Fallback synthétique pour forest/fire/wind/night si URL échoue */
+function buildSoundSynth(id,out){
+  if(!audioCtx||!out) return;
+  if(id==='forest'){
+    const g=mkGain(filt(makeNoise('pink'),'bandpass',1200,2),0.15);
+    if(g){lfo(g.gain,0.3,0.1);g.connect(out);}
+  }else if(id==='fire'){
+    const g=mkGain(filt(makeNoise('brown'),'lowpass',800,.5),0.3);
+    if(g){lfo(g.gain,0.15,0.15);g.connect(out);}
+  }else if(id==='wind'){
+    const n=makeNoise('pink');const bp=filt(n,'bandpass',400,.5);const g=mkGain(bp,0.35);
+    if(g){if(bp)lfo(bp.frequency,0.05,200);lfo(g.gain,0.08,0.2);g.connect(out);}
+  }else if(id==='night'){
+    [136,272,408].forEach(f=>{
+      if(!audioCtx) return;
+      const osc=audioCtx.createOscillator();const g=audioCtx.createGain();
+      osc.type='sine';osc.frequency.value=f;g.gain.value=0.08;
+      osc.connect(g);g.connect(out);osc.start();activeNodes.push(osc);
+    });
+  }
+}
+function playSound(id){
+  // DOIT être appelé depuis un event handler (onclick) pour iOS
+  if(!unlockAudio()) return;
+
+  // Fade out l'ancien son
+  stopRealSound();
+  const oldNodes=[...activeNodes];
+  activeNodes=[];
+  if(bellsTimeout){clearTimeout(bellsTimeout);bellsTimeout=null;}
+  currentSoundId=id;
+
+  if(masterGain){
+    masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
+    masterGain.gain.setValueAtTime(masterGain.gain.value,audioCtx.currentTime);
+    masterGain.gain.linearRampToValueAtTime(0,audioCtx.currentTime+0.5);
+  }
+
+  // Arrêter les anciens noeuds après le fade
+  setTimeout(()=>{
+    oldNodes.forEach(n=>{try{n.stop()}catch{}});
+    // Recréer masterGain proprement
+    if(audioCtx){
+      try{if(masterGain) masterGain.disconnect();}catch{}
+      masterGain=audioCtx.createGain();
+      masterGain.gain.value=0;
+      masterGain.connect(audioCtx.destination);
+      if(id!=='none'){
+        masterGain.gain.setValueAtTime(0,audioCtx.currentTime);
+        masterGain.gain.linearRampToValueAtTime(0.7,audioCtx.currentTime+1.2);
+        buildSound(id,masterGain);
+      }
+    }
+  },550);
+}
+
+function stopSound(){
+  if(bellsTimeout){clearTimeout(bellsTimeout);bellsTimeout=null;}
+  stopRealSound();
+  currentSoundId='none';
+  if(!audioCtx||!masterGain) return;
+  const nodes=[...activeNodes];activeNodes=[];
+  masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
+  masterGain.gain.setValueAtTime(masterGain.gain.value,audioCtx.currentTime);
+  masterGain.gain.linearRampToValueAtTime(0,audioCtx.currentTime+0.8);
+  setTimeout(()=>{
+    nodes.forEach(n=>{try{n.stop()}catch{}});
+    if(audioCtx){
+      try{if(masterGain) masterGain.disconnect();}catch{}
+      masterGain=audioCtx.createGain();
+      masterGain.gain.value=0.7;
+      masterGain.connect(audioCtx.destination);
+    }
+  },900);
+}
+
+/* iOS FIX: reprendre l'audio quand l'app revient au premier plan */
+document.addEventListener('visibilitychange',()=>{
+  if(!document.hidden && audioCtx && audioCtx.state==='suspended' && currentSoundId!=='none'){
+    audioCtx.resume();
+  }
+});
+
+/* ══════════════════════════════════════════════
+   BREATH SOUND ENGINE — Cohérence Cardiaque
+   Son de respiration synchronisé avec les phases
+══════════════════════════════════════════════ */
+let breathSoundNodes=[];
+let breathSoundCtx=null; // utilise le même audioCtx
+
+function startBreathSound(phase, durationSec){
+  stopBreathSound();
+  if(!audioCtx) return;
+  // Réutilise audioCtx existant
+  const out=masterGain||audioCtx.destination;
+  const now=audioCtx.currentTime;
+
+  // Souffle nasal/buccal : bruit blanc filtré avec enveloppe
+  const bufLen=audioCtx.sampleRate*Math.max(durationSec,1);
+  const buf=audioCtx.createBuffer(1,bufLen,audioCtx.sampleRate);
+  const d=buf.getChannelData(0);
+  // Bruit rose pour texture douce
+  let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
+  for(let i=0;i<d.length;i++){
+    const w=Math.random()*2-1;
+    b0=0.99886*b0+w*0.0555179;b1=0.99332*b1+w*0.0750759;
+    b2=0.96900*b2+w*0.1538520;b3=0.86650*b3+w*0.3104856;
+    b4=0.55000*b4+w*0.5329522;b5=-0.7616*b5-w*0.0168980;
+    d[i]=(b0+b1+b2+b3+b4+b5+b6+w*0.5362)*0.11;b6=w*0.115926;
+  }
+  const src=audioCtx.createBufferSource();
+  src.buffer=buf;
+
+  // Filtrage selon la phase
+  const lp=audioCtx.createBiquadFilter();
+  if(phase==='inhale'){
+    lp.type='bandpass';lp.frequency.value=1800;lp.Q.value=1.2;
+  }else if(phase==='hold'){
+    // Silence doux pendant la rétention
+    return;
+  }else{
+    lp.type='bandpass';lp.frequency.value=800;lp.Q.value=0.8;
+  }
+
+  const env=audioCtx.createGain();
+  env.gain.setValueAtTime(0,now);
+
+  if(phase==='inhale'){
+    // Monte progressivement — inspiration
+    env.gain.linearRampToValueAtTime(0.18,now+durationSec*0.15);
+    env.gain.linearRampToValueAtTime(0.22,now+durationSec*0.7);
+    env.gain.linearRampToValueAtTime(0,now+durationSec*0.98);
+  }else{
+    // Descend progressivement — expiration plus longue et douce
+    env.gain.linearRampToValueAtTime(0.15,now+durationSec*0.08);
+    env.gain.linearRampToValueAtTime(0.18,now+durationSec*0.3);
+    env.gain.linearRampToValueAtTime(0.05,now+durationSec*0.85);
+    env.gain.linearRampToValueAtTime(0,now+durationSec*0.98);
+  }
+
+  src.connect(lp);lp.connect(env);env.connect(out);
+  src.start(now);
+  src.stop(now+durationSec+0.1);
+  breathSoundNodes=[src,env,lp];
+}
+
+function stopBreathSound(){
+  breathSoundNodes.forEach(n=>{try{n.stop?n.stop():n.disconnect()}catch{}});
+  breathSoundNodes=[];
+}
+
+/* ══════════════════════════════════════════════
+   BREATHING ENGINE
+══════════════════════════════════════════════ */
+let breatheInhale=5,breatheHold=0,breatheExhale=5,breatheDuration=5;
+let breatheRunning=false,breatheCancelled=false;
+let breatheCountdownInterval=null,breathePhase='idle';
+let breatheTotalLeft=0,breatheCycles=0;
+
+function breatheToggle(){
+  unlockAudio(); // iOS: synchrone
+  breatheRunning ? breatheStop() : breatheStart();
+}
+
+function breatheStart(){
+  breatheCancelled=false;breatheRunning=true;
+  breatheTotalLeft=breatheDuration*60;breatheCycles=0;
+  document.getElementById('breathe-play').innerHTML=pauseIcon();
+  document.getElementById('breathe-reset').style.display='flex';
+  document.getElementById('session-timer-wrap').style.display='block';
+  document.getElementById('settings-toggle').disabled=true;
+  closeSettings();
+
+  // iOS FIX: drift compensation avec Date.now()
+  let lastTick=Date.now();
+  breatheCountdownInterval=setInterval(()=>{
+    const now=Date.now();
+    const ticks=Math.max(1,Math.round((now-lastTick)/1000));
+    lastTick=now;
+    breatheTotalLeft=Math.max(0,breatheTotalLeft-ticks);
+    updateSessionTimer();
+    if(breatheTotalLeft<=0){
+      breatheStop();
+      const pattern=breatheHold>0?`${breatheInhale}-${breatheHold}-${breatheExhale}`:`${breatheInhale}-${breatheExhale}`;
+      saveSession('breathing',breatheDuration*60,pattern);
+    }
+  },1000);
+
+  runBreatheCycle();
+}
+
+function breatheStop(){
+  breatheCancelled=true;breatheRunning=false;
+  clearInterval(breatheCountdownInterval);
+  breathePhase='idle';
+  setBreathUI('idle',0);
+  stopBreathSound();
+  document.getElementById('breathe-play').innerHTML=playIcon();
+  document.getElementById('breathe-reset').style.display='none';
+  document.getElementById('session-timer-wrap').style.display='none';
+  document.getElementById('settings-toggle').disabled=false;
+}
+
+function breatheReset(){ breatheStop(); }
+
+async function runBreatheCycle(){
+  while(!breatheCancelled){
+    breathePhase='inhale';
+    if(!await breatheCountdown(breatheInhale)) break;
+    if(breatheHold>0){
+      breathePhase='hold';
+      if(!await breatheCountdown(breatheHold)) break;
+    }
+    breathePhase='exhale';
+    if(!await breatheCountdown(breatheExhale)) break;
+    breatheCycles++;
+  }
+}
+
+function breatheCountdown(seconds){
+  return new Promise(resolve=>{
+    let rem=seconds;
+    setBreathUI(breathePhase,rem);
+    if(breatheCancelled){resolve(false);return;}
+    let lastTick=Date.now();
+    const id=setInterval(()=>{
+      if(breatheCancelled){clearInterval(id);resolve(false);return;}
+      const now=Date.now();
+      rem-=Math.max(1,Math.round((now-lastTick)/1000));
+      lastTick=now;
+      if(rem<0) rem=0;
+      setBreathUI(breathePhase,rem);
+      if(rem<=0){clearInterval(id);resolve(true);}
+    },1000);
+  });
+}
+
+function setBreathUI(phase,timeLeft){
+  const circle=document.getElementById('breath-circle');
+  const label=document.getElementById('phase-label');
+  const timerEl=document.getElementById('phase-timer');
+  const r1=document.getElementById('ring1');
+  const r2=document.getElementById('ring2');
+
+  label.textContent=phase==='idle'?t('ready'):phase==='inhale'?t('inhale'):phase==='hold'?t('hold'):t('exhale');
+  timerEl.textContent=phase!=='idle'?timeLeft+'s':'';
+
+  // Son de respiration : déclenché uniquement au début de chaque phase (timeLeft == durée totale)
+  const isPhaseStart=(
+    (phase==='inhale'  && timeLeft===breatheInhale) ||
+    (phase==='hold'    && timeLeft===breatheHold)   ||
+    (phase==='exhale'  && timeLeft===breatheExhale)
+  );
+  if(breatheRunning && isPhaseStart && audioCtx){
+    const dur=phase==='inhale'?breatheInhale:phase==='hold'?breatheHold:breatheExhale;
+    startBreathSound(phase, dur);
+  }
+  if(phase==='idle') stopBreathSound();
+
+  circle.className='breath-circle';
+  if(phase==='inhale'){circle.classList.add('inhale');circle.style.transform='scale(1)';r1.style.transform='scale(1.3)';r2.style.transform='scale(1.15)';}
+  else if(phase==='hold'){circle.classList.add('hold');circle.style.transform='scale(1)';}
+  else if(phase==='exhale'){circle.classList.add('exhale');circle.style.transform='scale(.55)';r1.style.transform='scale(.7)';r2.style.transform='scale(.65)';}
+  else{circle.style.transform='scale(.6)';r1.style.transform='scale(.7)';r2.style.transform='scale(.65)';}
+
+  const dur=phase==='inhale'?breatheInhale:phase==='hold'?breatheHold:breatheExhale;
+  circle.style.transition=`transform ${dur||0.5}s ease-in-out, background 0.8s`;
+  r1.style.transition=`transform ${dur||0.5}s ease-in-out`;
+  r2.style.transition=`transform ${dur||0.5}s ease-in-out`;
+
+  if(breatheRunning) document.getElementById('cycle-label').textContent=t('cycle')+' '+(breatheCycles+1);
+}
+
+function updateSessionTimer(){
+  const m=Math.floor(breatheTotalLeft/60),s=breatheTotalLeft%60;
+  document.getElementById('session-timer-disp').textContent=
+    String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+}
+
+/* ══════════════════════════════════════════════
+   MEDITATION ENGINE
+══════════════════════════════════════════════ */
+let mDuration=10,mRunning=false,mTimeLeft=600,mInterval=null,mSound='none';
+const CIRC=2*Math.PI*120;
+
+function meditateToggle(){
+  unlockAudio(); // iOS: synchrone, AVANT tout
+  if(mRunning){meditateStop();stopSound();}
+  else{meditateStart();}
+}
+
+function meditateStart(){
+  mRunning=true;
+  document.getElementById('meditate-play').innerHTML=pauseIcon();
+  document.getElementById('meditate-reset').style.display='flex';
+  document.getElementById('m-dur-section').style.display='none';
+  document.getElementById('m-sound-section').style.display='none';
+  document.getElementById('timer-sub-lbl').textContent=t('remaining');
+  // iOS FIX: playSound appelé ici car on est dans le même event handler que meditateToggle
+  playSound(mSound);
+  let lastTick=Date.now();
+  mInterval=setInterval(()=>{
+    const now=Date.now();
+    const ticks=Math.max(1,Math.round((now-lastTick)/1000));
+    lastTick=now;
+    mTimeLeft=Math.max(0,mTimeLeft-ticks);
+    updateTimerUI();
+    if(mTimeLeft<=0){
+      meditateStop();stopSound();
+      saveSession('meditation',mDuration*60,null);
+    }
+  },1000);
+}
+
+function meditateStop(){
+  mRunning=false;clearInterval(mInterval);
+  document.getElementById('meditate-play').innerHTML=playIcon();
+  document.getElementById('m-dur-section').style.display='block';
+  document.getElementById('m-sound-section').style.display='block';
+  document.getElementById('timer-sub-lbl').textContent='';
+}
+
+function meditateReset(){
+  meditateStop();stopSound();
+  mTimeLeft=mDuration*60;
+  updateTimerUI();
+  document.getElementById('meditate-reset').style.display='none';
+}
+
+function setMDuration(d){
+  mDuration=d;mTimeLeft=d*60;
+  updateTimerUI();
+  document.querySelectorAll('.m-dur-pill').forEach(b=>{
+    b.classList.toggle('active',parseInt(b.dataset.d)===d);
+  });
+}
+
+function updateTimerUI(){
+  const m=Math.floor(mTimeLeft/60),s=mTimeLeft%60;
+  document.getElementById('timer-disp').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  const prog=mDuration>0?(mDuration*60-mTimeLeft)/(mDuration*60):0;
+  document.getElementById('timer-ring').style.strokeDashoffset=CIRC*(1-prog);
+}
+
+function selectSound(id){
+  unlockAudio(); // iOS: synchrone
+  mSound=id;
+  document.querySelectorAll('.sound-btn').forEach(b=>b.classList.toggle('active',b.dataset.s===id));
+  if(mRunning) playSound(id);
+}
+
+/* ══════════════════════════════════════════════
+   HISTORY
+══════════════════════════════════════════════ */
+function getSessions(){try{return JSON.parse(SafeStorage.get('rr-sessions')||'[]')}catch{return[]}}
+
+function saveSession(type,durSec,pattern){
+  const s=getSessions();
+  s.unshift({type,durSec,pattern,completed:true,date:new Date().toISOString()});
+  SafeStorage.set('rr-sessions',JSON.stringify(s.slice(0,200)));
+  updateHomeStats();
+}
+
+function updateHomeStats(){
+  const s=getSessions();
+  const totalMin=Math.round(s.reduce((a,x)=>a+x.durSec,0)/60);
+  document.getElementById('stat-sessions').textContent=s.length;
+  document.getElementById('stat-minutes').textContent=totalMin;
+  document.getElementById('stat-row').style.display=s.length?'flex':'none';
+}
+
+function renderHistory(){
+  const sessions=getSessions();
+  const totalMin=Math.round(sessions.reduce((a,x)=>a+x.durSec,0)/60);
+  const nBreathe=sessions.filter(s=>s.type==='breathing').length;
+  document.getElementById('hi-total').textContent=sessions.length;
+  document.getElementById('hi-minutes').textContent=totalMin;
+  document.getElementById('hi-breathe').textContent=nBreathe;
+  const list=document.getElementById('session-list');
+  if(!sessions.length){
+    list.innerHTML=`<div class="empty-state"><p>${t('noSessions')}</p><small>${t('startFirst')}</small></div>`;
+    return;
+  }
+  list.innerHTML=sessions.map(s=>{
+    const d=new Date(s.date);
+    const dateStr=d.toLocaleDateString(lang==='fr'?'fr-FR':'en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    const min=Math.round(s.durSec/60);
+    const typeLabel=s.type==='breathing'?t('breathing'):t('meditation');
+    const patStr=s.pattern?` <span style="color:var(--text-dim);font-size:11px">(${s.pattern})</span>`:'';
+    const ic=s.type==='breathing'?'rgba(94,234,212,.6)':'rgba(167,139,250,.6)';
+    return `<div class="session-item">
+      <div class="s-icon ${s.type==='breathing'?'breathe':'meditate'}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="${ic}" stroke-width="1.8" width="15" height="15">
+          ${s.type==='breathing'?'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>':'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'}
+        </svg>
+      </div>
+      <div class="s-info">
+        <div class="s-type">${typeLabel}${patStr}</div>
+        <div class="s-meta">${min} min · ${dateStr}</div>
+      </div>
+      ${s.completed?`<div class="s-badge">${t('done')}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════════════
+   INFO PAGE
+══════════════════════════════════════════════ */
+function renderInfo(){
+  const sections=[
+    {color:'rgba(251,113,133,.08)',stroke:'rgba(251,113,133,.6)',
+     svg:'<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>',q:'whatQ',a:'whatA'},
+    {color:'rgba(167,139,250,.08)',stroke:'rgba(167,139,250,.6)',
+     svg:'<path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>',q:'howQ',a:'howA'},
+    {color:'rgba(251,191,36,.08)',stroke:'rgba(251,191,36,.6)',
+     svg:'<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',q:'practiceQ',a:'practiceA'},
+    {color:'rgba(94,234,212,.08)',stroke:'rgba(94,234,212,.6)',
+     svg:'<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',q:'scienceQ',a:'scienceA'},
+  ];
+  document.getElementById('info-sections').innerHTML=sections.map(s=>`
+    <div class="info-section">
+      <div class="info-section-head">
+        <div class="icon" style="background:${s.color}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="${s.stroke}" stroke-width="1.8" width="16" height="16">${s.svg}</svg>
+        </div>
+        <h2>${t(s.q)}</h2>
+      </div>
+      <p>${t(s.a)}</p>
+    </div>`).join('');
+  document.getElementById('benefits-list').innerHTML=
+    ['b1','b2','b3','b4','b5','b6'].map(k=>`
+      <div class="benefit-row"><div class="benefit-dot"></div><span>${t(k)}</span></div>`).join('');
+}
+
+/* ══════════════════════════════════════════════
+   SETTINGS
+══════════════════════════════════════════════ */
+let settingsOpen=false;
+function toggleSettings(){
+  settingsOpen=!settingsOpen;
+  document.getElementById('settings-panel').classList.toggle('open',settingsOpen);
+  document.getElementById('settings-toggle').classList.toggle('open',settingsOpen);
+}
+function closeSettings(){
+  settingsOpen=false;
+  document.getElementById('settings-panel').classList.remove('open');
+  document.getElementById('settings-toggle').classList.remove('open');
+}
+function updateSlider(key,val){
+  val=parseInt(val);
+  if(key==='inhale'){breatheInhale=val;document.getElementById('inhale-val').textContent=val+'s';}
+  if(key==='hold'){breatheHold=val;document.getElementById('hold-val').textContent=val+'s';}
+  if(key==='exhale'){breatheExhale=val;document.getElementById('exhale-val').textContent=val+'s';}
+  updatePresetHighlight();
+  document.getElementById('b-pattern-sub').textContent=patternStr();
+}
+function updateSliderDisplays(){
+  document.getElementById('inhale-val').textContent=breatheInhale+'s';
+  document.getElementById('hold-val').textContent=breatheHold+'s';
+  document.getElementById('exhale-val').textContent=breatheExhale+'s';
+}
+function patternStr(){return breatheHold>0?`${breatheInhale}-${breatheHold}-${breatheExhale}`:`${breatheInhale}-${breatheExhale}`;}
+function updatePresetHighlight(){
+  document.querySelectorAll('.preset-btn').forEach(b=>{
+    b.classList.toggle('active',parseInt(b.dataset.i)===breatheInhale&&parseInt(b.dataset.h)===breatheHold&&parseInt(b.dataset.e)===breatheExhale);
+  });
+}
+
+/* ══════════════════════════════════════════════
+   ICONS
+══════════════════════════════════════════════ */
+function playIcon(){return`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="24" height="24"><polygon points="5 3 19 12 5 21 5 3"/></svg>`;}
+function pauseIcon(){return`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="24" height="24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`;}
+
+/* ══════════════════════════════════════════════
+   RENDER ALL (i18n + init UI)
+══════════════════════════════════════════════ */
+function renderPresets(){
+  const presets=[
+    {key:'coherence',i:5,h:0,e:5},{key:'relaxing',i:4,h:7,e:8},
+    {key:'energizing',i:6,h:0,e:2},{key:'box',i:4,h:4,e:4}
+  ];
+  document.getElementById('preset-grid').innerHTML=presets.map(p=>`
+    <button class="preset-btn" data-i="${p.i}" data-h="${p.h}" data-e="${p.e}"
+      onclick="applyPreset(${p.i},${p.h},${p.e})">
+      <span>${t(p.key)}</span><small>${t(p.key+'D')}</small>
+    </button>`).join('');
+  updatePresetHighlight();
+}
+function applyPreset(i,h,e){
+  breatheInhale=i;breatheHold=h;breatheExhale=e;
+  document.getElementById('inhale-range').value=i;
+  document.getElementById('hold-range').value=h;
+  document.getElementById('exhale-range').value=e;
+  updateSliderDisplays();updatePresetHighlight();
+  document.getElementById('b-pattern-sub').textContent=patternStr();
+}
+function renderDurPills(){
+  document.getElementById('dur-pills').innerHTML=
+    [3,5,10,20].map(d=>`<button class="dur-pill${breatheDuration===d?' active':''}" onclick="setBDuration(${d})">${d} min</button>`).join('');
+}
+function setBDuration(d){
+  breatheDuration=d;
+  document.querySelectorAll('#dur-pills .dur-pill').forEach(b=>b.classList.toggle('active',b.textContent===d+' min'));
+}
+function renderMDurPills(){
+  document.getElementById('m-dur-pills').innerHTML=
+    [5,10,15,20,30,45,60].map(d=>`<button class="dur-pill m-dur-pill${mDuration===d?' active':''}" data-d="${d}" onclick="setMDuration(${d})">${d} min</button>`).join('');
+}
+function renderSoundGrid(){
+  const sounds=[
+    {id:'none',emoji:'🔇',key:'silence'},{id:'rain',emoji:'🌧️',key:'rain'},
+    {id:'ocean',emoji:'🌊',key:'ocean'},{id:'forest',emoji:'🐦',key:'forest'},
+    {id:'fire',emoji:'🔥',key:'fire'},{id:'wind',emoji:'🍃',key:'wind'},
+    {id:'bells',emoji:'🔔',key:'bells'},{id:'night',emoji:'🕉️',key:'night'},
+  ];
+  document.getElementById('sound-grid').innerHTML=sounds.map(s=>`
+    <button class="sound-btn${mSound===s.id?' active':''}" data-s="${s.id}" onclick="selectSound('${s.id}')">
+      <span class="s-emoji">${s.emoji}</span>
+      <span class="s-name">${t(s.key)}</span>
+    </button>`).join('');
+}
+function renderWaveBars(){
+  const wb=document.getElementById('wave-bars');
+  if(!wb||wb.children.length) return;
+  const h=[8,14,22,30,36,40,36,30,22,14,8,18,28,38,32,20,10,16,26,36];
+  wb.innerHTML=h.map((v,i)=>`<div class="wave-bar" style="height:${v}px;animation-delay:${i*.1}s"></div>`).join('');
+}
+
+function renderAll(){
+  document.getElementById('lang-btn').textContent=lang==='fr'?'EN':'FR';
+  // Home
+  document.getElementById('h-find').innerHTML=`${t('findYour')} <span class="grad">${t('calm')}</span>`;
+  document.getElementById('h-sub').textContent=t('sub');
+  document.getElementById('h-sessions-lbl').textContent=t('sessions');
+  document.getElementById('h-minutes-lbl').textContent=t('minutes');
+  document.getElementById('h-cc-title').textContent=t('ccTitle');
+  document.getElementById('h-cc-desc').textContent=t('ccDesc');
+  document.getElementById('h-med-title').textContent=t('medTitle');
+  document.getElementById('h-med-desc').textContent=t('medDesc');
+  document.getElementById('h-q1').textContent=t('q1');
+  document.getElementById('h-q1d').textContent=t('q1d');
+  document.getElementById('h-q2').textContent=t('q2');
+  document.getElementById('h-q2d').textContent=t('q2d');
+  document.getElementById('h-quote').textContent=t('quote');
+  // Breathe
+  document.getElementById('b-title').textContent=t('ccTitle');
+  document.getElementById('b-pattern-sub').textContent=patternStr();
+  document.getElementById('b-pattern-lbl').textContent=t('pattern');
+  document.getElementById('b-inhale-lbl').textContent=t('inhale');
+  document.getElementById('b-hold-lbl').textContent=t('hold');
+  document.getElementById('b-exhale-lbl').textContent=t('exhale');
+  document.getElementById('b-dur-lbl').textContent=t('dur');
+  updateSliderDisplays();renderPresets();renderDurPills();setBreathUI('idle',0);
+  // Meditate
+  document.getElementById('m-title').textContent=t('medTitle');
+  document.getElementById('m-sub').textContent=t('medDesc');
+  document.getElementById('m-dur-lbl').textContent=t('dur');
+  document.getElementById('m-sound-lbl').textContent=t('sound');
+  renderMDurPills();renderSoundGrid();updateTimerUI();
+  // History labels
+  document.getElementById('hi-title').textContent=t('hiTitle');
+  document.getElementById('hi-sub').textContent=t('hiSub');
+  document.getElementById('hi-sessions-lbl').textContent=t('sessions');
+  document.getElementById('hi-minutes-lbl').textContent=t('minutes');
+  document.getElementById('hi-breathe-lbl').textContent=t('breathing');
+  // Info
+  document.getElementById('i-title').textContent=t('iTitle');
+  document.getElementById('i-sub').textContent=t('iSub');
+  document.getElementById('i-benefits-title').textContent=t('benefits');
+  document.getElementById('i-cta').textContent=t('cta');
+  // Nav
+  document.getElementById('nav-home-lbl').textContent=t('home');
+  document.getElementById('nav-breathe-lbl').textContent=t('breathe');
+  document.getElementById('nav-meditate-lbl').textContent=t('meditate');
+  document.getElementById('nav-history-lbl').textContent=t('history');
+  updateHomeStats();
+  renderWaveBars();
+}
+
+/* ── INIT ── */
+renderAll();
 </script>
 
 </body>
